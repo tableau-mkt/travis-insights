@@ -5,7 +5,30 @@ this script at the top of your `.travis.yml` and every subsequent command
 will be logged to New Relic Insights!
 
 ## Installation
-@todo
+1. Note your New Relic account number (the integer in the URL when viewing
+   data in Insights).
+2. Generate a New Relic Insights Insert Key in the manner described
+   [here](https://docs.newrelic.com/docs/insights/new-relic-insights/custom-events/insert-custom-events-insights-api#register).
+3. Add these values to your build config, ensuring that they are encrypted.
+   They should be named `$NR_ACCOUNT` and `$NR_INSERT_KEY` respectively.
+   You can do so either using the [Travis CLI](https://docs.travis-ci.com/user/environment-variables/#Encrypting-environment-variables)
+   or by setting them in [Repository Settings](https://docs.travis-ci.com/user/environment-variables/#Defining-Variables-in-Repository-Settings)
+   through the Travis UI.
+4. Add the following to your `.travis.yml` file. It should be the very first
+   thing run in the `before_install` build step. You may need to add this
+   step in your config:
+
+```yml
+before_install:
+  - curl -s https://raw.githubusercontent.com/tableau-mkt/travis-insights/master/instrument.sh > ~/.nrt.sh && source ~/.nrt.sh
+```
+
+__Warning__: You're installing a thing into your build that a) you didn't
+write, and b) is pushing information to a third party (New Relic). Think
+about what that means and consider doing this in a safer way. You're smart.
+
+You may also wish to reference a specific commit rather than pointing at
+the `master` branch in the `curl` call above.
 
 ## Data & Usage
 Every command will be pushed to New Relic Insights with the following
@@ -34,6 +57,9 @@ properties:
 - __Tag__: If the current build is for a git tag, this is set to the tag
   name.
 
+Once the data is flowing in, you'll be able to run NRQL queries like
+the following:
+
 #### Build steps that fail from most to least frequently (past week)
 ```sql
 SELECT COUNT(*) FROM BuildCommand
@@ -51,7 +77,5 @@ FACET Command
 
 #### Commits that broke the build (past hour)
 ```sql
-SELECT uniques(Commit) FROM BuildCommand
-WHERE ExitCode != 0
-SINCE 1 day ago
+SELECT uniques(Commit) FROM BuildCommand WHERE ExitCode != 0
 ```
