@@ -13,7 +13,7 @@ travis_assert() {
   local result=${1:-$?}
 
   # Log the command to New Relic Insights.
-  log_to_insights $result
+  log_to_insights $result "Pre-Script"
 
   # Fire off the original travis assert method.
   original_travis_assert $result;
@@ -26,7 +26,7 @@ travis_result() {
   export TRAVIS_TEST_RESULT=$(( ${TRAVIS_TEST_RESULT:-0} | $(($result != 0)) ))
 
   # Log the command to New Relic Insights.
-  log_to_insights $result
+  log_to_insights $result "Script"
 
   # Fire off the original travis result method.
   original_travis_result $result;
@@ -51,7 +51,8 @@ log_to_insights() {
   "JobNumber": "$TRAVIS_JOB_NUMBER",
   "BuildOS": "$TRAVIS_OS_NAME",
   "BuildSlug": "$TRAVIS_REPO_SLUG",
-  "Tag": "$TRAVIS_TAG"
+  "Tag": "$TRAVIS_TAG",
+  "Phase": "$2"
 }]
 JSON
 
