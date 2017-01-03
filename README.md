@@ -56,6 +56,9 @@ properties:
   currently being built.
 - __Tag__: If the current build is for a git tag, this is set to the tag
   name.
+- __Phase__: If the command is run during the "script" build phase, this
+  is set to "Script" otherwise this is set to "Pre-Script" (useful for
+  distinguishing between build _errors_ and build _fails_).
 
 Once the data is flowing in, you'll be able to run NRQL queries like
 the following:
