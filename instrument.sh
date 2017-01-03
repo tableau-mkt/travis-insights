@@ -17,7 +17,7 @@ travis_assert() {
 [{
   "eventType": "BuildCommand",
   "ExitCode": $result,
-  "Command": "${TRAVIS_CMD//\"/}",
+  "Command": "${TRAVIS_CMD//\"/\\\\\"}",
   "Time": $SECONDS,
   "Duration": $[$SECONDS-${LAST_TIME:-$SECONDS}],
   "Branch": "$TRAVIS_BRANCH",
