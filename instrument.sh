@@ -12,11 +12,32 @@ eval "$(echo "original_travis_assert()"; declare -f travis_assert | tail -n +2)"
 travis_assert() {
   local result=${1:-$?}
 
+  # Log the command to New Relic Insights.
+  log_to_insights $result
+
+  # Fire off the original travis assert method.
+  original_travis_assert $result;
+}
+
+# Override the travis_result bash function.
+eval "$(echo "original_travis_result()"; declare -f travis_result | tail -n +2)"
+travis_result() {
+  local result=$1
+  export TRAVIS_TEST_RESULT=$(( ${TRAVIS_TEST_RESULT:-0} | $(($result != 0)) ))
+
+  # Log the command to New Relic Insights.
+  log_to_insights $result
+
+  # Fire off the original travis result method.
+  original_travis_result $result;
+}
+
+log_to_insights() {
   # Ping NR with all of the goodies.
   cat << JSON | curl -d @- -X POST -H "Content-Type: application/json" -H "X-Insert-Key: $NR_INSERT_KEY" https://insights-collector.newrelic.com/v1/accounts/$NR_ACCOUNT/events > /dev/null 2>&1 &
 [{
   "eventType": "BuildCommand",
-  "ExitCode": $result,
+  "ExitCode": $1,
   "Command": "${TRAVIS_CMD//\"/}",
   "Time": $SECONDS,
   "Duration": $[$SECONDS-${LAST_TIME:-$SECONDS}],
@@ -33,6 +54,7 @@ travis_assert() {
   "Tag": "$TRAVIS_TAG"
 }]
 JSON
+
   export LAST_TIME=$SECONDS
 
   # If the result is non-zero, wait a moment before returning to give
@@ -41,7 +63,4 @@ JSON
     wait
   fi
 
-  # Fire off the original travis assert method.
-  original_travis_assert $result;
 }
-
