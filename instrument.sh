@@ -42,6 +42,7 @@ log_to_insights() {
   "Time": $SECONDS,
   "Duration": $[$SECONDS-${LAST_TIME:-$SECONDS}],
   "Branch": "$TRAVIS_BRANCH",
+  "PRBranch": "$TRAVIS_PULL_REQUEST_BRANCH",
   "BuildID": "$TRAVIS_BUILD_ID",
   "BuildNumber": "$TRAVIS_BUILD_NUMBER",
   "Commit": "$TRAVIS_COMMIT",
